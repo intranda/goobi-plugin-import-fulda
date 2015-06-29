@@ -15,13 +15,13 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import de.sub.goobi.Beans.Prozess;
+import org.goobi.beans.Process;
 import org.goobi.production.enums.ImportReturnValue;
 import org.goobi.production.enums.ImportType;
 import org.goobi.production.enums.PluginType;
-import org.goobi.production.Import.DocstructElement;
-import org.goobi.production.Import.ImportObject;
-import org.goobi.production.Import.Record;
+import org.goobi.production.importer.DocstructElement;
+import org.goobi.production.importer.ImportObject;
+import org.goobi.production.importer.Record;
 import org.goobi.production.plugin.interfaces.IImportPlugin;
 import org.goobi.production.plugin.interfaces.IPlugin;
 import org.goobi.production.properties.ImportProperty;
@@ -107,20 +107,20 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
                     answer.add(io);
 
                 } else {
-                    Prozess Prozess = GoobiMetadataUpdate.loadProcess(getProcessTitle());
-                    logger.debug("found Prozess " + Prozess.getTitel() + " in goobi");
-                    prefs = Prozess.getRegelsatz().getPreferences();
+                    Process prozess = GoobiMetadataUpdate.loadProcess(getProcessTitle());
+                    logger.debug("found Prozess " + prozess.getTitel() + " in goobi");
+                    prefs = prozess.getRegelsatz().getPreferences();
                     mainTitleType = prefs.getMetadataTypeByName("TitleDocMain");
                     dateType = prefs.getMetadataTypeByName("DateIssued");
                     issueType = prefs.getDocStrctTypeByName("NewspaperIssue");
                     try {
-                        fileformat = Prozess.readMetadataFile();
+                        fileformat = prozess.readMetadataFile();
                         logger.debug("loaded metadata");
-                        updateData(Prozess);
+                        updateData(prozess);
                         fileformat.getDigitalDocument().addAllContentFiles();
-                        Prozess.writeMetadataFile(fileformat);
+                        prozess.writeMetadataFile(fileformat);
 
-                        Helper.setMeldung("Prozess " + Prozess.getTitel() + " wurde erfolgreich aktualisiert");
+                        Helper.setMeldung("Prozess " + prozess.getTitel() + " wurde erfolgreich aktualisiert");
                     } catch (Exception e) {
                         logger.error(e);
                     }
@@ -130,7 +130,7 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
         return answer;
     }
 
-    private void updateData(Prozess Prozess) throws PreferencesException, ParseException, TypeNotAllowedForParentException,
+    private void updateData(Process prozess) throws PreferencesException, ParseException, TypeNotAllowedForParentException,
             TypeNotAllowedAsChildException, MetadataTypeNotAllowedException, ImportPluginException {
 
         // nachträgliches Einfügen von Strukturelementen
@@ -151,12 +151,12 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
                 imageOrderNumber = dd.getPhysicalDocStruct().getAllChildren().size() + 1;
             }
             logger.debug("first image number of issue " + issueFolder.getName() + " is " + imageOrderNumber);
-            createIssue(dd, volume, imageOrderNumber, issueFolder, true, Prozess);
+            createIssue(dd, volume, imageOrderNumber, issueFolder, true, prozess);
         }
 
     }
 
-    private int createIssue(DigitalDocument dd, DocStruct volume, int imageOrderNumber, File issueFolder, boolean isUpdate, Prozess Prozess)
+    private int createIssue(DigitalDocument dd, DocStruct volume, int imageOrderNumber, File issueFolder, boolean isUpdate, Process prozess)
             throws TypeNotAllowedForParentException, TypeNotAllowedAsChildException, ParseException, MetadataTypeNotAllowedException,
             ImportPluginException {
 
@@ -173,7 +173,7 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
             imageOrderNumber = linkImages(issue, dd, imageList, imageOrderNumber);
             // completeImageList.addAll(imageList);
             if (isUpdate) {
-                moveImagesToFolder(imageList, issueFolder.getName(), Prozess);
+                moveImagesToFolder(imageList, issueFolder.getName(), prozess);
             } else {
                 moveImages(imageList, issueFolder.getName());
             }
@@ -421,10 +421,10 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
 
     }
 
-    private void moveImagesToFolder(List<File> imageList, String prefix, Prozess Prozess) throws ImportPluginException {
+    private void moveImagesToFolder(List<File> imageList, String prefix, Process prozess) throws ImportPluginException {
 
         try {
-            File destinationFolder = new File(Prozess.getImagesOrigDirectory(false));
+            File destinationFolder = new File(prozess.getImagesOrigDirectory(false));
             for (File file : imageList) {
                 FileUtils.copyFile(file, new File(destinationFolder, prefix + "_" + file.getName()));
             }
