@@ -39,6 +39,7 @@ import ugh.exceptions.TypeNotAllowedAsChildException;
 import ugh.exceptions.TypeNotAllowedForParentException;
 import de.intranda.goobi.plugins.util.GoobiMetadataUpdate;
 import de.sub.goobi.config.ConfigPlugins;
+import de.sub.goobi.forms.MassImportForm;
 import de.sub.goobi.helper.Helper;
 import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.ImportPluginException;
@@ -64,6 +65,8 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
     private MetadataType dateType;
     private DocStructType issueType;
 
+    private MassImportForm form = null;
+    
     @Override
     public void setData(Record r) {
     }
@@ -82,6 +85,9 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
     public List<ImportObject> generateFiles(List<Record> records) {
         List<ImportObject> answer = new ArrayList<ImportObject>();
         for (Record currentRecord : records) {
+            if (form != null) {
+                form.addProcessToProgressBar();
+            }
             currentIdentifier = currentRecord.getData();
 
             String basedir = ConfigPlugins.getPluginConfig(this).getString("basedir", "/opt/digiverso/goobi/import/");
@@ -566,7 +572,7 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
         return PLUGIN_TITLE;
     }
 
-    @Override
+    
     public String getDescription() {
         return PLUGIN_TITLE;
     }
@@ -600,4 +606,10 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
             return name.endsWith("tif") || name.endsWith("TIF") || name.endsWith("jpg");
         }
     };
+
+    @Override
+    public void setForm(MassImportForm form) {
+       this.form = form;
+        
+    }
 }
