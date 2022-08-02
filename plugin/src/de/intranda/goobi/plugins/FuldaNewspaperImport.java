@@ -26,6 +26,14 @@ import org.goobi.production.plugin.interfaces.IImportPlugin;
 import org.goobi.production.plugin.interfaces.IPlugin;
 import org.goobi.production.properties.ImportProperty;
 
+import de.intranda.goobi.plugins.util.GoobiMetadataUpdate;
+import de.sub.goobi.config.ConfigPlugins;
+import de.sub.goobi.forms.MassImportForm;
+import de.sub.goobi.helper.Helper;
+import de.sub.goobi.helper.exceptions.DAOException;
+import de.sub.goobi.helper.exceptions.ImportPluginException;
+import de.sub.goobi.helper.exceptions.SwapException;
+import net.xeoh.plugins.base.annotations.PluginImplementation;
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
 import ugh.dl.DocStructType;
@@ -37,14 +45,6 @@ import ugh.exceptions.MetadataTypeNotAllowedException;
 import ugh.exceptions.PreferencesException;
 import ugh.exceptions.TypeNotAllowedAsChildException;
 import ugh.exceptions.TypeNotAllowedForParentException;
-import de.intranda.goobi.plugins.util.GoobiMetadataUpdate;
-import de.sub.goobi.config.ConfigPlugins;
-import de.sub.goobi.forms.MassImportForm;
-import de.sub.goobi.helper.Helper;
-import de.sub.goobi.helper.exceptions.DAOException;
-import de.sub.goobi.helper.exceptions.ImportPluginException;
-import de.sub.goobi.helper.exceptions.SwapException;
-import net.xeoh.plugins.base.annotations.PluginImplementation;
 
 @PluginImplementation
 public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
@@ -66,7 +66,7 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
     private DocStructType issueType;
 
     private MassImportForm form = null;
-    
+
     @Override
     public void setData(Record r) {
     }
@@ -76,14 +76,15 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
         return null;
     }
 
-    
+
+    @Override
     public String getProcessTitle() {
         return currentIdentifier + "_" + volumeNumber;
     }
 
     @Override
     public List<ImportObject> generateFiles(List<Record> records) {
-        List<ImportObject> answer = new ArrayList<ImportObject>();
+        List<ImportObject> answer = new ArrayList<>();
         for (Record currentRecord : records) {
             if (form != null) {
                 form.addProcessToProgressBar();
@@ -98,11 +99,11 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
                 break;
             }
             for (String volumefolder : volumes) {
-                
+
                 volumeNumber = volumefolder;
                 if (!GoobiMetadataUpdate.checkForExistingProcess(getProcessTitle())) {
 
-                   
+
                     ImportObject io = new ImportObject();
 
                     io.setImportFileName(currentIdentifier + "_" + volumeNumber);
@@ -137,7 +138,7 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
     }
 
     private void updateData(Process prozess) throws PreferencesException, ParseException, TypeNotAllowedForParentException,
-            TypeNotAllowedAsChildException, MetadataTypeNotAllowedException, ImportPluginException {
+    TypeNotAllowedAsChildException, MetadataTypeNotAllowedException, ImportPluginException {
 
         // nachträgliches Einfügen von Strukturelementen
 
@@ -170,7 +171,7 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
 
         if ((issueFolder.listFiles(directoryFilter) == null) || (issueFolder.listFiles(directoryFilter).length == 0)) {
             File[] imageArray = issueFolder.listFiles(imageFilter);
-            List<File> imageList = new ArrayList<File>();
+            List<File> imageList = new ArrayList<>();
             imageList.addAll(Arrays.asList(imageArray));
             Collections.sort(imageList);
 
@@ -184,12 +185,12 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
                 moveImages(imageList, issueFolder.getName());
             }
         }
-      
+
         return imageOrderNumber;
     }
 
     private DocStruct createSingleIssue(DigitalDocument dd, DocStruct volume, File issueFolder) throws TypeNotAllowedForParentException,
-            TypeNotAllowedAsChildException, ParseException, MetadataTypeNotAllowedException {
+    TypeNotAllowedAsChildException, ParseException, MetadataTypeNotAllowedException {
         DocStruct issue = dd.createDocStruct(issueType);
         volume.addChild(issue);
         // parse current date
@@ -201,7 +202,7 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
         } else {
             dateString = issueFolder.getName().substring(0, 8);
             issueNumber = issueFolder.getName().substring(9);
-            // date with letter at the end                
+            // date with letter at the end
         }
 
         Date issued = dateformatFilesystem.parse(dateString);
@@ -443,9 +444,6 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
         } catch (DAOException e) {
             logger.error(this.currentIdentifier + ": " + e.getMessage(), e);
             throw new ImportPluginException(e);
-        } catch (InterruptedException e) {
-            logger.error(this.currentIdentifier + ": " + e.getMessage(), e);
-            throw new ImportPluginException(e);
         }
     }
 
@@ -458,7 +456,7 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
         if ((issueArray == null) || (issueArray.length == 0)) {
             return null;
         }
-        List<File> issueList = new ArrayList<File>();
+        List<File> issueList = new ArrayList<>();
         issueList.addAll(Arrays.asList(issueArray));
         Collections.sort(issueList);
         return issueList;
@@ -476,7 +474,7 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
 
     @Override
     public List<Record> generateRecordsFromFilenames(List<String> filenames) {
-        List<Record> records = new ArrayList<Record>();
+        List<Record> records = new ArrayList<>();
         for (String filename : filenames) {
             Record rec = new Record();
             rec.setData(filename);
@@ -510,7 +508,7 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
     @Override
     public List<String> getAllFilenames() {
         String basedir = ConfigPlugins.getPluginConfig(this).getString("basedir", "/opt/digiverso/goobi/import/");
-        List<String> subfolderInImportfolder = new ArrayList<String>();
+        List<String> subfolderInImportfolder = new ArrayList<>();
         File folder = new File(basedir);
         if (folder.exists() && folder.isDirectory()) {
             subfolderInImportfolder.addAll(Arrays.asList(folder.list(directoryFilter)));
@@ -572,7 +570,7 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
         return PLUGIN_TITLE;
     }
 
-    
+
     public String getDescription() {
         return PLUGIN_TITLE;
     }
@@ -609,7 +607,7 @@ public class FuldaNewspaperImport implements IImportPlugin, IPlugin {
 
     @Override
     public void setForm(MassImportForm form) {
-       this.form = form;
-        
+        this.form = form;
+
     }
 }
