@@ -10,7 +10,6 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <timestamp>${maven.build.timestamp}</timestamp>
-    <maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
     <goobi.version>23.08</goobi.version>
   </properties>
   <distributionManagement>
