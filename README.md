@@ -1,6 +1,9 @@
 # Goobi workflow Plugin: goobi-plugin-import-fulda
 
-<img src="https://goobi.io/wp-content/uploads/logo_goobi_plugin.png" align="right" style="margin:0 0 20px 20px;" alt="Plugin for Goobi workflow" width="175" height="109">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://goobi.io/logo_goobi_workflow_dark.png">
+  <img src="https://goobi.io/logo_goobi_workflow.png" align="right" alt="Plugin for Goobi workflow" width="240" height="132" hspace="20" vspace="10">
+</picture>
 
 This Import Plugin for Goobi workflow allows to import journals for the University Library of Fulda. The data must be in a folder structure that is understood by the plugin. The top level is named after the PPN, below that come the volumes, below that the issues, inside that are the scans. The PPN from the top level is used for OPAC requests.
 
